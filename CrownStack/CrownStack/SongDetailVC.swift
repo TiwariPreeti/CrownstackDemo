@@ -18,9 +18,10 @@ class SongDetailVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-            
-        lblTitle.text = self.strTitle
+        
+        lblTitle.text = "Release Date - " + self.strTitle
         lblDescription.text = self.strDetail
+        self.title = "Song Detail"
         if strImg == "" {
             
         }else{

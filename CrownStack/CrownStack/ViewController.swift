@@ -10,14 +10,28 @@ import UIKit
 class ViewController: UIViewController , UITableViewDelegate , UITableViewDataSource {
     @IBOutlet weak var loader: UIActivityIndicatorView!
     @IBOutlet weak var tableView: UITableView!
+    let refreshControl = UIRefreshControl()
     var jsonResult = NSMutableArray()
     var arrData = [[String:Any]]()
     
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.title = "Songs"
         self.tableView.isHidden = true
         self.callData()
+        self.pullToRefresh()
+    }
+    
+    func pullToRefresh() {
+        refreshControl.attributedTitle = NSAttributedString(string: "Pull to refresh")
+           refreshControl.addTarget(self, action: #selector(self.refresh(_:)), for: .valueChanged)
+           tableView.addSubview(refreshControl)
+    }
+    
+    @objc func refresh(_ sender: AnyObject) {
+       // Code to refresh table view
+        self.tableView.reloadData()
+        self.refreshControl.endRefreshing()
     }
     
     // MARK: - Table view data source
@@ -44,10 +58,11 @@ class ViewController: UIViewController , UITableViewDelegate , UITableViewDataSo
             cell.lblName.text = info["artistName"] as? String
             cell.collectionName.text = info["collectionName"] as? String
             cell.trackName.text = info["trackName"] as? String
-            let url = URL(string:  info["artworkUrl100"] as? String ?? "" )
+            if  let url = URL(string:  info["artworkUrl100"] as? String ?? "" ) {
+            
             
             DispatchQueue.global().async {
-                let data = try? Data(contentsOf: url!)
+                let data = try? Data(contentsOf: url)
                 DispatchQueue.main.async {
                     if data == nil {
                         
@@ -57,6 +72,7 @@ class ViewController: UIViewController , UITableViewDelegate , UITableViewDataSo
                 }
             }
         }
+        }
         return cell
     }
     
@@ -65,8 +81,8 @@ class ViewController: UIViewController , UITableViewDelegate , UITableViewDataSo
         let vc = ( storyboard?.instantiateViewController (withIdentifier: "SongDetailVC")  as!  SongDetailVC)
         let info = self.arrData[indexPath.row]  //as! SongListModal
         if self.arrData.count > 0{
-            vc.strImg =  info["artworkUrl30"] as? String ?? ""
-            vc.strTitle = info["collectionName"] as? String ?? ""
+            vc.strImg =  info["artworkUrl100"] as? String ?? ""
+            vc.strTitle = info["releaseDate"] as? String ?? ""
             vc.strDetail = info["longDescription"] as? String ?? ""
         }
         self.navigationController?.pushViewController(vc, animated: false)
